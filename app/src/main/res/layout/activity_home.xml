@@ -1,0 +1,97 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".HomeActivity">
+    <!--    android:background="@drawable/rectangle"-->
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent">
+
+        <LinearLayout
+            android:id="@+id/calendarTitle"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="vertical">
+
+            <TextView
+                android:layout_marginLeft="25dp"
+                android:layout_marginTop="10dp"
+                android:id="@+id/titleYear"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="2021" />
+
+            <TextView
+                android:textColor="@color/black"
+                android:textStyle="bold"
+                android:layout_marginLeft="25dp"
+                android:textSize="25dp"
+                android:id="@+id/titleMonth"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="JANUARY" />
+
+
+        </LinearLayout>
+
+        <GridLayout
+            android:id="@+id/calendarGrid"
+            android:columnCount="7"
+            android:paddingHorizontal="13dp"
+            android:layout_gravity="center"
+            android:rowCount="6"
+            android:layout_weight="8"
+            android:layout_width="match_parent"
+            android:layout_height="0dp">
+            <TextView style="@style/calendarDaysInWeek" android:text="MON" />
+            <TextView style="@style/calendarDaysInWeek" android:text="TUE" />
+            <TextView style="@style/calendarDaysInWeek" android:text="WED" />
+            <TextView style="@style/calendarDaysInWeek" android:text="THU" />
+            <TextView style="@style/calendarDaysInWeek" android:text="FRI" />
+            <TextView style="@style/calendarDaysInWeek" android:text="SAT" />
+            <TextView style="@style/calendarDaysInWeek" android:text="SUN" />
+            <TextView android:id="@+id/testid" style="@style/calendarDays" android:text="1" />
+            <TextView style="@style/calendarDays" android:text="2" />
+            <TextView style="@style/calendarDays" android:text="3" />
+            <TextView style="@style/calendarDays" android:text="4" />
+            <TextView style="@style/calendarDays" android:text="5" />
+            <TextView style="@style/calendarDays" android:text="6" />
+            <TextView style="@style/calendarDays" android:text="7" />
+            <TextView style="@style/calendarDays" android:text="8" />
+            <TextView style="@style/calendarDays" android:text="9" />
+            <TextView style="@style/calendarDays" android:text="10" />
+            <TextView style="@style/calendarDays" android:text="11" />
+            <TextView style="@style/calendarDays" android:text="12" />
+            <TextView style="@style/calendarDays" android:text="13" />
+            <TextView style="@style/calendarDays" android:text="14" />
+            <TextView style="@style/calendarDays" android:text="15" />
+            <TextView style="@style/calendarDays" android:text="16" />
+            <TextView style="@style/calendarDays" android:text="17" />
+            <TextView style="@style/calendarDays" android:text="18" />
+            <TextView style="@style/calendarDays" android:text="19" />
+            <TextView style="@style/calendarDays" android:text="20" />
+            <TextView style="@style/calendarDays" android:text="21" />
+            <TextView style="@style/calendarDays" android:text="22" />
+            <TextView style="@style/calendarDays" android:text="23" />
+            <TextView style="@style/calendarDays" android:text="24" />
+            <TextView style="@style/calendarDays" android:text="25" />
+            <TextView style="@style/calendarDays" android:text="26" />
+            <TextView style="@style/calendarDays" android:text="27" />
+            <TextView style="@style/calendarDays" android:text="28" />
+            <TextView style="@style/calendarDays" android:text="29" />
+            <TextView style="@style/calendarDays" android:text="30" />
+            <TextView style="@style/calendarDays" android:text="31" />
+        </GridLayout>
+    </LinearLayout>
+
+
+
+
+</androidx.constraintlayout.widget.ConstraintLayout>

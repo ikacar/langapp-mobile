@@ -55,20 +55,22 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent">
 
-        <ImageView
-            android:id="@+id/line1"
-            android:layout_width="300dp"
-            android:layout_height="93dp"
-            android:layout_gravity="center_horizontal"
-            android:src="@drawable/line" >
+        <EditText
+            android:id="@+id/usernameText"
+            android:layout_width="match_parent"
+            android:layout_height="64dp"
+            android:ems="10"
+            android:hint="username"
+            android:inputType="textPersonName" />
 
-        </ImageView>
-        <ImageView
-            android:id="@+id/line2"
-            android:layout_width="300dp"
-            android:layout_height="93dp"
-            android:layout_gravity="center_horizontal"
-            android:src="@drawable/line" />
+        <EditText
+            android:id="@+id/passwordText"
+            android:layout_width="match_parent"
+            android:layout_height="56dp"
+            android:ems="10"
+            android:hint="password"
+            android:inputType="textPersonName" />
+
     </LinearLayout>
 
     <LinearLayout
@@ -80,7 +82,7 @@
         android:gravity="center_horizontal"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        android:onClick="test">
+        android:onClick="signIn">
 
         <ImageView
             android:id="@+id/button"
