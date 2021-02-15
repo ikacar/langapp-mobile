@@ -6,6 +6,7 @@ import androidx.core.content.ContextCompat;
 
 import android.content.pm.PackageManager;
 import android.media.MediaRecorder;
+import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
 import android.view.LayoutInflater;
@@ -15,10 +16,15 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import com.example.langapp.entities.Task;
+import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.material.bottomsheet.BottomSheetDialog;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.storage.FirebaseStorage;
+import com.google.firebase.storage.StorageReference;
+import com.google.firebase.storage.UploadTask;
 
+import java.io.File;
 import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -45,12 +51,16 @@ public class HomeActivity extends AppCompatActivity {
     private Map<String, String> rezultati;
     FirebaseDatabase database = FirebaseDatabase.getInstance();
     DatabaseReference reff = database.getReference().child("Task");
+
+    private StorageReference mStorage;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_home);
         System.out.println("ooo");
 
+        mStorage = FirebaseStorage.getInstance().getReference();
 
         //uzmi rezultate sa firebase-a
         //uzmi samo koji fale ili uzmi sve?
@@ -118,7 +128,7 @@ public class HomeActivity extends AppCompatActivity {
 
                 if(checkPermission()) {
 
-                    AudioSavePathInDevice = getExternalCacheDir() + "/"  + "AudioRecording.3gp";
+                    AudioSavePathInDevice = getExternalFilesDir(null) + "/"  + "AudioRecording.3gp";
 //                    Environment.getExternalStorageDirectory().getAbsolutePath() + "/" +
 //                            CreateRandomAudioFileName(5) + "AudioRecording.3gp";
 
@@ -184,18 +194,26 @@ public class HomeActivity extends AppCompatActivity {
         bottomSheetView.findViewById(R.id.uploadButton).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-//                        Toast.makeText(HomeActivity.this, "Exiting",Toast.LENGTH_SHORT).show();
-                System.out.println("upload dugme");
-                Task task  = new Task();
-//                FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
-//                user.toString();
-                String date = new SimpleDateFormat("dd-MM-yyyy").format(new Date());
-                System.out.println(date);
-                task.setName("1_" + date);
-                task.setDay(Integer.parseInt(tv.getText().toString()));
-                task.setDuration(123123);
-                task.setUsers("ilija biljana");
-                reff.push().setValue(task);
+                StorageReference filepath = mStorage.child("Audio").child("audio_file.3gp");
+                Uri uri = Uri.fromFile(new File(AudioSavePathInDevice));
+                filepath.putFile(uri).addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
+                    @Override
+                    public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
+
+                    }
+                });
+////                        Toast.makeText(HomeActivity.this, "Exiting",Toast.LENGTH_SHORT).show();
+//                System.out.println("upload dugme");
+//                Task task  = new Task();
+////                FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
+////                user.toString();
+//                String date = new SimpleDateFormat("dd-MM-yyyy").format(new Date());
+//                System.out.println(date);
+//                task.setName("1_" + date);
+//                task.setDay(Integer.parseInt(tv.getText().toString()));
+//                task.setDuration(123123);
+//                task.setUsers("ilija biljana");
+//                reff.push().setValue(task);
 
             }
         });
