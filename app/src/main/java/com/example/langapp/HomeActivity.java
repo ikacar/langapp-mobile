@@ -39,7 +39,7 @@ public class HomeActivity extends AppCompatActivity {
     MediaRecorder mediaRecorder ;
     MediaPlayer mediaPlayer ;
     Random random ;
-    String RandomAudioFileName = "ABCDEFGHIJKLMNOP";
+    String RandomAudioFileName = "Audio-test";
     public static final int RequestPermissionCode = 1;
 
     private Map<String, String> rezultati;
@@ -49,6 +49,7 @@ public class HomeActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_home);
+        System.out.println("ooo");
 
 
         //uzmi rezultate sa firebase-a
@@ -117,9 +118,9 @@ public class HomeActivity extends AppCompatActivity {
 
                 if(checkPermission()) {
 
-                    AudioSavePathInDevice =
-                            Environment.getExternalStorageDirectory().getAbsolutePath() + "/" +
-                                    CreateRandomAudioFileName(5) + "AudioRecording.3gp";
+                    AudioSavePathInDevice = getExternalCacheDir() + "/"  + "AudioRecording.3gp";
+//                    Environment.getExternalStorageDirectory().getAbsolutePath() + "/" +
+//                            CreateRandomAudioFileName(5) + "AudioRecording.3gp";
 
                     MediaRecorderReady();
 
