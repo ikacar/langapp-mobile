@@ -45,9 +45,8 @@ public class HomeActivity extends AppCompatActivity {
     MediaRecorder mediaRecorder ;
     MediaPlayer mediaPlayer ;
     Random random ;
-    String RandomAudioFileName = "Audio-test";
+    String RandomAudioFileName;
     public static final int RequestPermissionCode = 1;
-
     private Map<String, String> rezultati;
     FirebaseDatabase database = FirebaseDatabase.getInstance();
     DatabaseReference reff = database.getReference().child("Task");
@@ -58,7 +57,6 @@ public class HomeActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_home);
-        System.out.println("ooo");
 
         mStorage = FirebaseStorage.getInstance().getReference();
 
@@ -92,7 +90,7 @@ public class HomeActivity extends AppCompatActivity {
 //        });
     }
     public void openBottomSheet(View v){
-
+        
 
         TextView tv = (TextView)v;
         System.out.println(tv.getText());
