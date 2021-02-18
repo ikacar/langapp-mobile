@@ -1,14 +1,18 @@
 package com.example.langapp;
 
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 
+import android.annotation.SuppressLint;
+import android.content.Context;
 import android.content.pm.PackageManager;
 import android.media.MediaRecorder;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.Button;
@@ -18,8 +22,12 @@ import android.widget.TextView;
 import com.example.langapp.entities.Task;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.material.bottomsheet.BottomSheetDialog;
+import com.google.firebase.FirebaseError;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
 import com.google.firebase.storage.UploadTask;
@@ -27,7 +35,9 @@ import com.google.firebase.storage.UploadTask;
 import java.io.File;
 import java.io.IOException;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 import java.util.Map;
 import java.util.Random;
 
@@ -38,19 +48,21 @@ import static android.Manifest.permission.RECORD_AUDIO;
 import static android.Manifest.permission.WRITE_EXTERNAL_STORAGE;
 
 public class HomeActivity extends AppCompatActivity {
-
-    Button buttonStart, buttonStop, buttonPlayLastRecordAudio,
-            buttonUpload ;
-    String AudioSavePathInDevice = null;
-    MediaRecorder mediaRecorder ;
-    MediaPlayer mediaPlayer ;
-    Random random ;
-    String RandomAudioFileName;
+    //TODO pomeriti odavle
     public static final int RequestPermissionCode = 1;
-    private Map<String, String> rezultati;
+
+    String filePath = null;
+    String fileName = null;
+    MediaRecorder mediaRecorder = null;
+    MediaPlayer mediaPlayer ;
+    List<Task> taskList = new ArrayList<>();
+
     FirebaseDatabase database = FirebaseDatabase.getInstance();
+    //TODO da li tereba
     DatabaseReference reff = database.getReference().child("Task");
 
+    int audioNumber = 1;
+    int duration = 0;
     private StorageReference mStorage;
 
     @Override
@@ -58,42 +70,35 @@ public class HomeActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_home);
 
-        mStorage = FirebaseStorage.getInstance().getReference();
+        mStorage =  FirebaseStorage.getInstance().getReference();
 
         //uzmi rezultate sa firebase-a
         //uzmi samo koji fale ili uzmi sve?
 
         //pokupi sve
-//        Button buttonShow = findViewById(R.id.buttonShow);
-//
-//        buttonShow.setOnClickListener(new View.OnClickListener() {
-//            @Override
-//            public void onClick(View v) {
-//                BottomSheetDialog bottomSheetDialog = new BottomSheetDialog(
-//                  HomeActivity.this, R.style.BottomSheetDialogTheme
-//                );
-//                View bottomSheetView = LayoutInflater.from(getApplicationContext())
-//                        .inflate(
-//                                R.layout.layout_bottom_sheet,
-//                                (LinearLayout)findViewById(R.id.bottomSheetContainer)
-//                        );
-//                bottomSheetView.findViewById(R.id.exitButton).setOnClickListener(new View.OnClickListener() {
-//                    @Override
-//                    public void onClick(View v) {
-////                        Toast.makeText(HomeActivity.this, "Exiting",Toast.LENGTH_SHORT).show();
-//                        bottomSheetDialog.dismiss();
-//                    }
-//                });
-//                bottomSheetDialog.setContentView(bottomSheetView);
-//                bottomSheetDialog.show();
-//            }
-//        });
+
+
     }
     public void openBottomSheet(View v){
-        
 
-        TextView tv = (TextView)v;
-        System.out.println(tv.getText());
+        LinearLayout bottomLayout = (LinearLayout) findViewById(R.id.homeLayout);
+        //PREUZMI TASKOVE ZA TAJ DAN
+        readTasksForDay(new FirebaseCallback() {
+            @Override
+            public void onCallback(List<Task> list, int lastRecorded) {
+                taskList = list;
+                audioNumber = lastRecorded + 1;
+            }
+        });
+        //NAPRAVI VIEW-OVE ZA PREUZETE TASKOVE
+        for (Task task : taskList) {
+            TextView textView = new TextView(this);
+            textView.setText(task.getName()+ " " + task.getDay());
+            bottomLayout.addView(textView);
+        }
+
+        int day = Integer.parseInt(((TextView)v).getText().toString());
+
 
         BottomSheetDialog bottomSheetDialog = new BottomSheetDialog(
                 HomeActivity.this, R.style.BottomSheetDialogTheme
@@ -103,11 +108,13 @@ public class HomeActivity extends AppCompatActivity {
                         R.layout.layout_bottom_sheet,
                         (LinearLayout)findViewById(R.id.bottomSheetContainer)
                 );
+        Button buttonStart = (Button) bottomSheetView.findViewById(R.id.startButton);
+        Button buttonStop = (Button) bottomSheetView.findViewById(R.id.stopButton);
+        Button buttonPlayLastRecordAudio = (Button) bottomSheetView.findViewById(R.id.playButton);
+        Button buttonUpload = (Button) bottomSheetView.findViewById(R.id.uploadButton);
 
-        buttonStart = (Button) bottomSheetView.findViewById(R.id.startButton);
-        buttonStop = (Button) bottomSheetView.findViewById(R.id.stopButton);
-        buttonPlayLastRecordAudio = (Button) bottomSheetView.findViewById(R.id.playButton);
-        buttonUpload = (Button) bottomSheetView.findViewById(R.id.uploadButton);
+        //******************************
+        //******************************
 
         buttonStop.setEnabled(false);
         buttonPlayLastRecordAudio.setEnabled(false);
@@ -116,7 +123,6 @@ public class HomeActivity extends AppCompatActivity {
         bottomSheetView.findViewById(R.id.exitButton).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-//                        Toast.makeText(HomeActivity.this, "Exiting",Toast.LENGTH_SHORT).show();
                 bottomSheetDialog.dismiss();
             }
         });
@@ -125,10 +131,8 @@ public class HomeActivity extends AppCompatActivity {
             public void onClick(View view) {
 
                 if(checkPermission()) {
-
-                    AudioSavePathInDevice = getExternalFilesDir(null) + "/"  + "AudioRecording.3gp";
-//                    Environment.getExternalStorageDirectory().getAbsolutePath() + "/" +
-//                            CreateRandomAudioFileName(5) + "AudioRecording.3gp";
+                    fileName = "Audio-"+day+"-"+audioNumber+".3gp";
+                    filePath = getExternalFilesDir(null) +  fileName;
 
                     MediaRecorderReady();
 
@@ -163,6 +167,14 @@ public class HomeActivity extends AppCompatActivity {
                 buttonStart.setEnabled(true);
                 buttonUpload.setEnabled(false);
 
+                mediaPlayer = new MediaPlayer();
+                try {
+                    mediaPlayer.setDataSource(filePath);
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+                duration = mediaPlayer.getDuration()/1000;
+
                 Toast.makeText(HomeActivity.this, "Recording Completed",
                         Toast.LENGTH_LONG).show();
             }
@@ -178,12 +190,11 @@ public class HomeActivity extends AppCompatActivity {
 
                 mediaPlayer = new MediaPlayer();
                 try {
-                    mediaPlayer.setDataSource(AudioSavePathInDevice);
+                    mediaPlayer.setDataSource(filePath);
                     mediaPlayer.prepare();
                 } catch (IOException e) {
                     e.printStackTrace();
                 }
-
                 mediaPlayer.start();
                 Toast.makeText(HomeActivity.this, "Recording Playing",
                         Toast.LENGTH_LONG).show();
@@ -192,26 +203,25 @@ public class HomeActivity extends AppCompatActivity {
         bottomSheetView.findViewById(R.id.uploadButton).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                StorageReference filepath = mStorage.child("Audio").child("audio_file.3gp");
-                Uri uri = Uri.fromFile(new File(AudioSavePathInDevice));
+                //insert into task table
+                Task task  = new Task();
+                String date = new SimpleDateFormat("dd-MM-yyyy").format(new Date());
+                task.setName(fileName);
+                task.setDay(day);
+                task.setDuration(duration);
+                task.setUsers("ilija biljana");
+                reff.push().setValue(task);
+
+                //upload on storage
+                StorageReference filepath = mStorage.child("Audio").child(fileName);
+                Uri uri = Uri.fromFile(new File(filePath));
                 filepath.putFile(uri).addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
                     @Override
                     public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
 
                     }
                 });
-////                        Toast.makeText(HomeActivity.this, "Exiting",Toast.LENGTH_SHORT).show();
-//                System.out.println("upload dugme");
-//                Task task  = new Task();
-////                FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
-////                user.toString();
-//                String date = new SimpleDateFormat("dd-MM-yyyy").format(new Date());
-//                System.out.println(date);
-//                task.setName("1_" + date);
-//                task.setDay(Integer.parseInt(tv.getText().toString()));
-//                task.setDuration(123123);
-//                task.setUsers("ilija biljana");
-//                reff.push().setValue(task);
+
 
             }
         });
@@ -223,20 +233,20 @@ public class HomeActivity extends AppCompatActivity {
         mediaRecorder.setAudioSource(MediaRecorder.AudioSource.MIC);
         mediaRecorder.setOutputFormat(MediaRecorder.OutputFormat.THREE_GPP);
         mediaRecorder.setAudioEncoder(MediaRecorder.OutputFormat.AMR_NB);
-        mediaRecorder.setOutputFile(AudioSavePathInDevice);
+        mediaRecorder.setOutputFile(filePath);
     }
 
-    public String CreateRandomAudioFileName(int string){
-        StringBuilder stringBuilder = new StringBuilder( string );
-        int i = 0 ;
-        while(i < string ) {
-            stringBuilder.append(RandomAudioFileName.
-                    charAt(random.nextInt(RandomAudioFileName.length())));
-
-            i++ ;
-        }
-        return stringBuilder.toString();
-    }
+//    public String CreateRandomAudioFileName(int string){
+//        StringBuilder stringBuilder = new StringBuilder( string );
+//        int i = 0 ;
+//        while(i < string ) {
+//            stringBuilder.append(RandomAudioFileName.
+//                    charAt(random.nextInt(RandomAudioFileName.length())));
+//
+//            i++ ;
+//        }
+//        return stringBuilder.toString();
+//    }
     private void requestPermission() {
         ActivityCompat.requestPermissions(HomeActivity.this, new
                 String[]{WRITE_EXTERNAL_STORAGE, RECORD_AUDIO}, RequestPermissionCode);
@@ -271,5 +281,28 @@ public class HomeActivity extends AppCompatActivity {
                 RECORD_AUDIO);
         return result == PackageManager.PERMISSION_GRANTED &&
                 result1 == PackageManager.PERMISSION_GRANTED;
+    }
+
+
+    private interface FirebaseCallback{
+        void onCallback(List<Task> taskList, int lastRecorded);
+    }
+    private void readTasksForDay(FirebaseCallback firebaseCallback){
+        reff.addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot snapshot) {
+                int lastRecorded = 1;
+                for (DataSnapshot postSnapshot: snapshot.getChildren()) {
+                    Task task = postSnapshot.getValue(Task.class);
+                    taskList.add(task);
+                }
+                firebaseCallback.onCallback(taskList, taskList.size());
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {
+                Log.e("The read failed: " ,error.getMessage());
+            }
+        });
     }
 }
