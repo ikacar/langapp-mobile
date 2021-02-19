@@ -1,16 +1,51 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
-    android:layout_width="150dip"
-    android:layout_height="100dip"
+    android:layout_width="200dip"
+    android:layout_height="200dip"
     android:orientation="vertical" >
 
 
-<TextView
-    android:layout_width="wrap_content"
-    android:layout_height="wrap_content"
-    android:layout_marginLeft="7dip"
-    android:layout_marginTop="40dip"
-    android:text="I am a floating Activity" />
+    <LinearLayout
+        android:orientation="vertical"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="NEW TASK">
+        </TextView>
+        <Button
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="RECORD">
+        </Button>
+
+        <Button
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="UPLOAD">
+        </Button>
+        <Button
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="DISMIS">
+        </Button>
+        <Button
+            android:id="@+id/assign_button"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="ASSIGN">
+        </Button>
+        <ListView
+
+            android:id="@+id/list"
+
+            android:layout_width="fill_parent"
+
+            android:layout_height="wrap_content"
+
+            />
+    </LinearLayout>
 
     </LinearLayout>

@@ -40,7 +40,7 @@ public class MainActivity extends AppCompatActivity {
 
     public void signIn(View view){
 //        String em = email.getText().toString();
-//        String pass = password.getText().toString();
+//        String pass = password.getText().toString();s
         String em = "zaekonomiku@gmail.com";
         String pass = "zaekonomiku123";
         mAuth.signInWithEmailAndPassword(em, pass).addOnCompleteListener(this, new OnCompleteListener<AuthResult>() {

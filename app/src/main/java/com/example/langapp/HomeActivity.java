@@ -5,12 +5,9 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 
-import android.annotation.SuppressLint;
-import android.content.Context;
-import android.content.Intent;
+
 import android.content.pm.PackageManager;
 import android.media.MediaRecorder;
-import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
 import android.util.Log;
@@ -21,9 +18,6 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import com.example.langapp.entities.Task;
-import com.google.android.gms.tasks.OnSuccessListener;
-import com.google.android.material.bottomsheet.BottomSheetDialog;
-import com.google.firebase.FirebaseError;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
@@ -31,17 +25,9 @@ import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
-import com.google.firebase.storage.UploadTask;
-
-import java.io.File;
-import java.io.IOException;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
-import java.util.Map;
-import java.util.Random;
-
 import android.media.MediaPlayer;
 import android.widget.Toast;
 
@@ -75,24 +61,29 @@ public class HomeActivity extends AppCompatActivity {
     }
     public void openBottomSheet(View v){
 
-                Intent intent=new Intent(getApplicationContext(), BottomSheetActivity.class);
-                startActivity(intent);
 
-//        LinearLayout bottomLayout = (LinearLayout) findViewById(R.id.homeLayout);
-//        //PREUZMI TASKOVE ZA TAJ DAN
-//        readTasksForDay(new FirebaseCallback() {
-//            @Override
-//            public void onCallback(List<Task> list, int lastRecorded) {
-//                taskList = list;
-//                audioNumber = lastRecorded + 1;
-//            }
-//        });
+
+
+
+        LinearLayout bottomLayout = (LinearLayout) findViewById(R.id.homeLayout);
+        //PREUZMI TASKOVE ZA TAJ DAN
+        readTasksForDay(new FirebaseCallback() {
+            @Override
+            public void onCallback(List<Task> list, int lastRecorded) {
+                taskList = list;
+                audioNumber = lastRecorded + 1;
+            }
+        });
 //        //NAPRAVI VIEW-OVE ZA PREUZETE TASKOVE
 //        for (Task task : taskList) {
 //            TextView textView = new TextView(this);
 //            textView.setText(task.getName()+ " " + task.getDay());
 //            bottomLayout.addView(textView);
 //        }
+        BottomSheetActivity bottomSheet = new BottomSheetActivity();
+        bottomSheet.setTaskList(taskList);
+        bottomSheet.show(getSupportFragmentManager(), "ModalBottomSheet");
+
 //
 //        int day = Integer.parseInt(((TextView)v).getText().toString());
 //
