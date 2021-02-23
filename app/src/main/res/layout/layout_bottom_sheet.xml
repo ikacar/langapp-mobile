@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:id="@+id/bottomSheetContainer"
     android:orientation="vertical"
     android:layout_width="match_parent"
@@ -14,21 +13,13 @@
         android:background="@drawable/bottom_sheet_background"
         >
 
-        <Button
 
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Task 1"/>
-        <Button
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Task 2"/>
 
-        <Button
-            android:id="@+id/newTask"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="New Task"/>
     </LinearLayout>
+    <Button
+        android:id="@+id/newTask"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="New Task"/>
 
 </LinearLayout>

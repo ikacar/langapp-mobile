@@ -61,27 +61,11 @@ public class HomeActivity extends AppCompatActivity {
     }
     public void openBottomSheet(View v){
 
+//
 
-
-
-
-        LinearLayout bottomLayout = (LinearLayout) findViewById(R.id.homeLayout);
-        //PREUZMI TASKOVE ZA TAJ DAN
-        readTasksForDay(new FirebaseCallback() {
-            @Override
-            public void onCallback(List<Task> list, int lastRecorded) {
-                taskList = list;
-                audioNumber = lastRecorded + 1;
-            }
-        });
-//        //NAPRAVI VIEW-OVE ZA PREUZETE TASKOVE
-//        for (Task task : taskList) {
-//            TextView textView = new TextView(this);
-//            textView.setText(task.getName()+ " " + task.getDay());
-//            bottomLayout.addView(textView);
-//        }
         BottomSheetActivity bottomSheet = new BottomSheetActivity();
-        bottomSheet.setTaskList(taskList);
+        int day = Integer.parseInt(((TextView)v).getText().toString());
+        bottomSheet.setDay(day);
         bottomSheet.show(getSupportFragmentManager(), "ModalBottomSheet");
 
 //
@@ -264,26 +248,4 @@ public class HomeActivity extends AppCompatActivity {
                 result1 == PackageManager.PERMISSION_GRANTED;
     }
 
-
-    private interface FirebaseCallback{
-        void onCallback(List<Task> taskList, int lastRecorded);
-    }
-    private void readTasksForDay(FirebaseCallback firebaseCallback){
-        reff.addValueEventListener(new ValueEventListener() {
-            @Override
-            public void onDataChange(DataSnapshot snapshot) {
-                int lastRecorded = 1;
-                for (DataSnapshot postSnapshot: snapshot.getChildren()) {
-                    Task task = postSnapshot.getValue(Task.class);
-                    taskList.add(task);
-                }
-                firebaseCallback.onCallback(taskList, taskList.size());
-            }
-
-            @Override
-            public void onCancelled(@NonNull DatabaseError error) {
-                Log.e("The read failed: " ,error.getMessage());
-            }
-        });
-    }
 }
