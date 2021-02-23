@@ -33,6 +33,7 @@ public class BottomSheetActivity extends BottomSheetDialogFragment {
     //DATABASE REFERENCE
     FirebaseDatabase database = FirebaseDatabase.getInstance();
     DatabaseReference reff = database.getReference().child("Task");
+    Button newTask;
     //LIST FOR DATA INPUT
 //    List<Task> taskList = new ArrayList<>();
     //EVIDENCE NUMBER OF AUDIO RECORDED FOR THAT DAY
@@ -44,8 +45,14 @@ public class BottomSheetActivity extends BottomSheetDialogFragment {
         View v = inflater.inflate(R.layout.layout_bottom_sheet,
                 container, false);
 
-
-
+        Button button  = (Button) v.findViewById(R.id.newTask);
+        button.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent=new Intent(getContext(), PopUpDialog.class);
+                startActivity(intent);
+            }
+        });
 //        readTasksForDay(new FirebaseCallback() {
 //            @Override
 //            public void onCallback(List<Task> list, int lastRecorded) {
