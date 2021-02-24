@@ -1,31 +1,25 @@
 package com.example.langapp;
 
-import android.annotation.SuppressLint;
-import android.app.Activity;
 import android.content.Intent;
 import android.media.MediaPlayer;
 import android.os.Bundle;
-import android.util.Log;
+import android.os.Environment;
+import android.os.Handler;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.LinearLayout;
+import android.widget.SeekBar;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-import androidx.appcompat.app.AppCompatActivity;
 
 import com.example.langapp.entities.Task;
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment;
-import com.google.firebase.database.DataSnapshot;
-import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
-import com.google.firebase.database.Query;
-import com.google.firebase.database.ValueEventListener;
 
 import java.io.File;
 import java.io.IOException;
@@ -43,7 +37,6 @@ public class BottomSheetActivity extends BottomSheetDialogFragment {
     int audioNumber = 0;
     List<Task> taskList;
     //TODO put folder path in .properties file
-    String audioPath;
     MediaPlayer mediaPlayer ;
 
 
@@ -58,42 +51,26 @@ public class BottomSheetActivity extends BottomSheetDialogFragment {
         for (Task task : taskList) {
             //vreate button view
         }
-        View v = inflater.inflate(R.layout.layout_bottom_sheet,
+        View layoutView = inflater.inflate(R.layout.layout_bottom_sheet,
                 container, false);
 
 
 
 
-        LinearLayout bottomLayout = (LinearLayout) v.findViewById(R.id.bottom_sheet_layout_container);
+        LinearLayout bottomLayout = (LinearLayout) layoutView.findViewById(R.id.bottom_sheet_layout_container);
         System.out.println(this.taskList.size());
         if(taskList.size()>0){
             for (Task task : taskList) {
-                Button taskButton = new Button(getActivity());
-                taskButton.setText(task.getName());
-                bottomLayout.addView(taskButton);
+                LinearLayout taskLayout = createTask(inflater, task);
+                bottomLayout.addView(taskLayout);
 
-                taskButton.setOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View v) {
-                        //TODO what if i click resume
-                        playAudio(task.getName());
-//                        if(mediaPlayer.isPlaying()){
-//                            stopAudio();
-//                        }
-//                        else
-//                        {
-//                            playAudio(task.getName());
-//
-//                        }
-                    }
-                });
             }
 
         }
         else{
             //TODO postavi textView na kome pise nema kreiranih taskova za danasnji dan
         }
-        Button button  = (Button) v.findViewById(R.id.newTask);
+        Button button  = (Button) layoutView.findViewById(R.id.newTask);
         button.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -101,13 +78,13 @@ public class BottomSheetActivity extends BottomSheetDialogFragment {
                 startActivity(intent);
             }
         });
-        return v;
+        return layoutView;
     }
     private List<Task> getTasksForDay(int day){
         //TODO call backend app on amazon or directly amazon database
         List<Task> list = new ArrayList<>();
-        list.add(new Task("ime1", 123123, 1, "biljana milica"));
-        list.add(new Task("ime2", 543665, 1, "biljana milica"));
+        list.add(new Task("music1.mp3", 123123, 1, "biljana milica"));
+        list.add(new Task("music2.mp3", 543665, 1, "biljana milica"));
         list.add(new Task("ime3", 243599, 2, "ilija milica"));
         list.add(new Task("ime4", 123687, 3, "jovica milica"));
         list.add(new Task("ime5", 123112, 2, "biljana jovanka"));
@@ -124,36 +101,98 @@ public class BottomSheetActivity extends BottomSheetDialogFragment {
         }
         return listNew;
     }
-    private void playAudio(String audioFile){
-        System.out.println("audio " + audioFile);
-        boolean canPlay = true; // false if could not download audio
 
-        String path = audioPath +"/"+audioFile;
-        File file = new File(path);
-        if(!file.exists()){
+    private LinearLayout createTask(LayoutInflater inflater, Task task){
+        View playButton, pauseButton;
+        TextView taskName, taskDuration, taskPosition;
+        SeekBar seekBar;
+        Handler handler = new Handler();
 
-            System.out.println("download file from storage");
-            //TODO
-            // else download from storage and play
-            // call Rest api for retrieving audio file
-            // canPlay false if cont download
-            // maybe check file.exists once again?
-            canPlay = false;
-        }
-        if(canPlay){
-            mediaPlayer = new MediaPlayer();
-            try {
-                mediaPlayer.setDataSource(path);
-                mediaPlayer.prepare();
-            } catch (IOException e) {
-                e.printStackTrace();
+        //NEW LAYOUT FOR TASK
+        LinearLayout taskLayout =(LinearLayout) inflater.inflate(R.layout.task_layout_sheet,null);
+
+        playButton = taskLayout.findViewById(R.id.bt_play);
+        pauseButton = taskLayout.findViewById(R.id.bt_pause);
+        taskName = taskLayout.findViewById(R.id.task_name);
+        taskDuration = taskLayout.findViewById(R.id.task_duration);
+        taskPosition = taskLayout.findViewById(R.id.task_position);
+        seekBar = taskLayout.findViewById(R.id.seek_bar);
+
+        //STATIC FIELDS
+        taskDuration.setText(task.getDuration().toString());
+        taskName.setText(task.getName());
+
+        Runnable runnable = new Runnable() {
+            @Override
+            public void run() {
+
+                seekBar.setProgress(mediaPlayer.getCurrentPosition());
+                handler.postDelayed(this, 500);
             }
-            mediaPlayer.start();
-        }
+        };
 
+        playButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                System.out.println("audio " + task.getName());
+                boolean canPlay = true; // false if could not download audio
+
+                //TODO VRATITI
+
+                String folderPath = getContext().getExternalFilesDir(null).toString();
+                File folder = new File(folderPath);
+                String taskPath = getContext().getExternalFilesDir(null).toString()  +"/" +  task.getName();
+                System.out.println(folderPath);
+
+                if(!folder.exists()){
+                    System.out.println("nema novog foldera - pravim");
+                    folder.mkdir();
+                }
+
+                File file = new File(taskPath);
+                if(!file.exists()){
+
+                    System.out.println("download file from storage");
+                    //TODO
+                    // else download from storage and play
+                    // call Rest api for retrieving audio file
+                    // canPlay false if cont download
+                    // maybe check file.exists once again?
+                    canPlay = false;
+                }
+                if(canPlay){
+                    playButton.setVisibility(View.GONE);
+                    pauseButton.setVisibility(View.VISIBLE);
+                    int id = 1;
+                    mediaPlayer = new MediaPlayer();
+
+                    //TODO VRATITI
+                    try {
+                        mediaPlayer.setDataSource(taskPath);
+                        mediaPlayer.prepare();
+                    } catch (IOException e) {
+                        System.out.println("ne moze da pokrene mediaplayer");
+                        e.printStackTrace();
+                    }
+                    mediaPlayer.start();
+                    seekBar.setMax(mediaPlayer.getDuration());
+                    handler.postDelayed(runnable,0);
+
+                }
+
+            }
+        });
+        pauseButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                playButton.setVisibility(View.VISIBLE);
+                pauseButton.setVisibility(View.GONE);
+                mediaPlayer.pause();
+                handler.removeCallbacks(runnable);
+            }
+        });
+        return taskLayout;
     }
-
-
     public int getDay() {
         return day;
     }
