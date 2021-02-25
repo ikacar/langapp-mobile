@@ -17,6 +17,7 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
 import com.example.langapp.entities.Task;
+import com.example.langapp.services.TaskService;
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
@@ -25,6 +26,13 @@ import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.zip.Inflater;
+
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
+import retrofit2.Retrofit;
+import retrofit2.converter.gson.GsonConverterFactory;
 
 public class BottomSheetActivity extends BottomSheetDialogFragment {
 
@@ -35,7 +43,7 @@ public class BottomSheetActivity extends BottomSheetDialogFragment {
     int day;
     //EVIDENCE NUMBER OF AUDIO RECORDED FOR THAT DAY
     int audioNumber = 0;
-    List<Task> taskList;
+    List<Task> taskList  = new ArrayList<>();
     //TODO put folder path in .properties file
     MediaPlayer mediaPlayer ;
 
@@ -43,24 +51,71 @@ public class BottomSheetActivity extends BottomSheetDialogFragment {
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
+        View layoutView = inflater.inflate(R.layout.layout_bottom_sheet, container, false);
 
         //DB call - gett all created tasks for spesific day
-        taskList = getTasksForDay(this.getDay());
+        getTasksForDay(this.getDay(), layoutView,inflater);
 
         //Create button views for task list
-        for (Task task : taskList) {
-            //vreate button view
-        }
-        View layoutView = inflater.inflate(R.layout.layout_bottom_sheet,
-                container, false);
+//        for (Task task : taskList) {
+//            //vreate button view
+//        }
 
+//        LinearLayout bottomLayout = (LinearLayout) layoutView.findViewById(R.id.bottom_sheet_layout_container);
+//        System.out.println("sss" + this.getTaskList().size());
+//        if(getTaskList()!=null && getTaskList().size()>0){
+//            for (Task task : taskList) {
+//                LinearLayout taskLayout = createTask(inflater, task);
+//                bottomLayout.addView(taskLayout);
+//
+//            }
+//
+//        }
+//        else{
+//            //TODO postavi textView na kome pise nema kreiranih taskova za danasnji dan
+//        }
+//        Button button  = (Button) layoutView.findViewById(R.id.newTask);
+//        button.setOnClickListener(new View.OnClickListener() {
+//            @Override
+//            public void onClick(View v) {
+//                Intent intent=new Intent(getContext(), PopUpDialog.class);
+//                startActivity(intent);
+//            }
+//        });
+        return layoutView;
+    }
+    private void getTasksForDay(int day, View layoutView, LayoutInflater inflater){
+        Retrofit retrofit = new Retrofit.Builder().baseUrl("http://192.168.0.17:8080/")
+                .addConverterFactory(GsonConverterFactory.create())
+                .build();
+        TaskService taskService = retrofit.create(TaskService.class);
+        Call<List<Task>> call = taskService.getTasksForDay(day);
+        call.enqueue(new Callback<List<Task>>() {
+            @Override
+            public void onResponse(Call<List<Task>> call, Response<List<Task>> response) {
+                if(!response.isSuccessful()){
+                    System.out.println("response je los");
+                }
+                else{
+                     taskList= response.body();
+                    showTasks(taskList,layoutView,inflater);
+                }
 
+            }
 
+            @Override
+            public void onFailure(Call<List<Task>> call, Throwable t) {
 
+                System.out.println("nisam uspeo " + t.getMessage());
+            }
+        });
+
+    }
+    private void showTasks(List<Task> allTasks, View layoutView, LayoutInflater inflater){
         LinearLayout bottomLayout = (LinearLayout) layoutView.findViewById(R.id.bottom_sheet_layout_container);
-        System.out.println(this.taskList.size());
-        if(taskList.size()>0){
-            for (Task task : taskList) {
+        System.out.println("sss" + this.getTaskList().size());
+        if(getTaskList()!=null && getTaskList().size()>0){
+            for (Task task : allTasks) {
                 LinearLayout taskLayout = createTask(inflater, task);
                 bottomLayout.addView(taskLayout);
 
@@ -78,30 +133,7 @@ public class BottomSheetActivity extends BottomSheetDialogFragment {
                 startActivity(intent);
             }
         });
-        return layoutView;
     }
-    private List<Task> getTasksForDay(int day){
-        //TODO call backend app on amazon or directly amazon database
-        List<Task> list = new ArrayList<>();
-        list.add(new Task("music1.mp3", 123123, 1, "biljana milica"));
-        list.add(new Task("music2.mp3", 543665, 1, "biljana milica"));
-        list.add(new Task("ime3", 243599, 2, "ilija milica"));
-        list.add(new Task("ime4", 123687, 3, "jovica milica"));
-        list.add(new Task("ime5", 123112, 2, "biljana jovanka"));
-        list.add(new Task("ime6", 123123, 3, "biljana milica"));
-        list.add(new Task("ime7", 543665, 4, "biljana milica"));
-        list.add(new Task("ime8", 243599, 4, "ilija milica"));
-        list.add(new Task("ime9", 123687, 5, "jovica milica"));
-        list.add(new Task("ime10", 123112, 5, "biljana jovanka"));
-
-        List<Task> listNew = new ArrayList<>();
-
-        for (Task task : list) {
-            if(task.getDay()==day) listNew.add(task);
-        }
-        return listNew;
-    }
-
     private LinearLayout createTask(LayoutInflater inflater, Task task){
         View playButton, pauseButton;
         TextView taskName, taskDuration, taskPosition;
@@ -199,5 +231,13 @@ public class BottomSheetActivity extends BottomSheetDialogFragment {
 
     public void setDay(int day) {
         this.day = day;
+    }
+
+    public List<Task> getTaskList() {
+        return taskList;
+    }
+
+    public void setTaskList(List<Task> taskList) {
+        this.taskList = taskList;
     }
 }
