@@ -3,39 +3,59 @@
     xmlns:android="http://schemas.android.com/apk/res/android" android:layout_width="match_parent"
     android:layout_height="match_parent">
     <LinearLayout
+        android:background="@drawable/task_layout_background"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:orientation="horizontal">
+        android:orientation="horizontal"
+        android:layout_marginVertical="10dp"
+        android:layout_marginHorizontal="30dp"
+        >
         <ImageView
-            android:layout_width="40dp"
-            android:layout_height="40dp"
+            android:layout_margin="10dp"
+            android:layout_width="70dp"
+            android:layout_height="70dp"
             android:id="@+id/users"
             android:src="@drawable/ic_baseline_supervised_user_circle_24"
             />
-        <TextView
+        <RelativeLayout
             android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:id="@+id/task_name"
-            android:layout_gravity="center"
-            android:textStyle="bold"
-            />
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:id="@+id/task_duration"
-            android:layout_gravity="center"
-            android:textStyle="bold"
-            />
-        <SeekBar
-            android:layout_width="250dp"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:layout_gravity="center"
-            android:id="@+id/seek_bar"
-            />
+            android:layout_height="match_parent">
+            <TextView
+                android:layout_marginTop="10dp"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:id="@+id/task_name"
+                android:textColor="@color/white"
+                android:textSize="17dp"
+                android:layout_gravity="center"
+                android:textStyle="bold"
+                />
+            <TextView
+                android:layout_below="@+id/task_name"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:id="@+id/task_duration"
+                android:textColor="@color/white"
+                android:textSize="10dp"
+                android:layout_gravity="center"
+                android:textStyle="bold"
+                />
+            <SeekBar
+                android:layout_below="@id/task_duration"
+                android:layout_width="150dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:layout_alignParentBottom="true"
+                android:id="@+id/seek_bar"
+                />
+        </RelativeLayout>
+
+
+
         <ImageView
-            android:layout_width="40dp"
-            android:layout_height="40dp"
+            android:layout_gravity="center"
+            android:layout_width="60dp"
+            android:layout_height="60dp"
             android:id="@+id/bt_play"
             android:src="@drawable/ic_baseline_play_circle_filled_24"
             />
